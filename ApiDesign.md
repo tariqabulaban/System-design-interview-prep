@@ -118,6 +118,31 @@ Senior/staff-level tradeoff:
 - Attribute-based or policy-based access control is more flexible, but harder to reason about and debug.
 - Staff-level design often means knowing when simple RBAC is enough and when richer policies are worth the complexity.
 
+Quick definitions:
+
+- Role-based access control (RBAC) grants access based on a user's role. Example: anyone with the `admin` role can delete tags, and anyone with the `user` role can only read them.
+- Attribute-based access control (ABAC) grants access based on attributes about the user, resource, or request context. Example: allow a user to update a tag only if `user.tenantId == tag.tenantId` and `tag.createdBy == user.userId`.
+- Policy-based access control (PBAC) uses explicit rules or policies to evaluate whether an action is allowed. In practice, PBAC often uses attributes underneath, but the emphasis is on expressing the logic as reusable policies. Example: "finance admins can approve invoices under $10,000 during business hours, but approvals above that require a director."
+
+One way to compare them:
+
+- RBAC: "Can this user do it because they are an `admin`?"
+- ABAC: "Can this user do it because their attributes and the resource attributes match the rule?"
+- PBAC: "Can this request pass the policy we defined for this action?"
+
+Example:
+
+- Imagine an API endpoint `PATCH /api/v1/documents/{documentId}`.
+- In RBAC, the rule might be: editors can update any document.
+- In ABAC, the rule might be: a user can update the document if they are in the same tenant and are either the owner or on the document's team.
+- In PBAC, the rule might be written as a central policy: allow update if `sameTenant && (isOwner || sameTeam) && !document.isLocked`.
+
+Practical intuition:
+
+- RBAC is great when access patterns are broad and stable.
+- ABAC and PBAC are better when access depends on business context, ownership, geography, time, data sensitivity, or tenant boundaries.
+- The tradeoff is that richer rules are harder to test, explain, and troubleshoot when a user asks, "Why was I denied?"
+
 6. Multi-tenancy and data isolation
 
 This is one of the biggest gaps in many mid-level API discussions.

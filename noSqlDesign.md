@@ -991,12 +991,19 @@ Relational may be better when:
 21. Interview discussion prompts
 
 - Why is DynamoDB better or worse than PostgreSQL for this use case?
+  DynamoDB is better when the reads and writes are high-volume, predictable, and key-based; PostgreSQL is better when the workload needs joins, flexible queries, and strong transactional guarantees.
 - What is the partition key and why?
+  The partition key should match the most common access pattern so reads stay local and cheap, while also spreading traffic evenly enough to avoid hot partitions.
 - What happens if one customer becomes much larger than all others?
+  That customer can create a hot partition or oversized shard, so you may need to bucket their data further by time, object type, or a synthetic suffix.
 - How do you handle stale reads?
+  Use strongly consistent reads only where needed, or design the product to tolerate lag with versioning, timestamps, retries, and clear UX around "recently updated" data.
 - How do you repair denormalized data after a failed update?
+  Use idempotent background repair jobs, event replay, or reconciliation scans so the system can detect mismatches and converge back to a correct state.
 - What part of this workload belongs in search instead of the primary database?
+  Full-text search, fuzzy matching, ranking, faceting, and free-form filtering usually belong in a search index rather than the primary transactional store.
 - Would this graph workload actually justify a graph database?
+  A graph database is justified when relationship traversal is the core workload and multi-hop queries are central; if most reads are simple lookups, a relational or document model is often simpler.
 
 22. Design checklist
 
